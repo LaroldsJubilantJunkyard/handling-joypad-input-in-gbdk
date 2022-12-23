@@ -1,9 +1,9 @@
 #include <gb/gb.h>
 #include "SimpleSprite.h"
 
-UINT8 joypadPrevious;
-UINT8 spriteX,spriteY;
-INT8 velocityX,velocityY;
+uint8_t spriteX,spriteY;
+int8_t velocityX,velocityY;
+uint8_t joypadCurrent=0,joypadPrevious=0;
 
 void main(void)
 {
@@ -24,33 +24,39 @@ void main(void)
 
     // Loop forever
     while(1) {
-    
+
+        // We'll need to check the joypad input twice
+        // never call "joypad()" more than once per frame
+        // We'll save it's current value and check that variable
+        joypadPrevious=joypadCurrent;
+        joypadCurrent = joypad();
+
         // If the right button on the d-pad is held down
-        if(joypad() & J_RIGHT){
-        
+        if(joypadCurrent & J_RIGHT){
+
             // Positive x velocity to move the sprite to the right
             velocityX=1;
-            
+
         // If the right button on the d-pad is held down
-        }else if(joypad() & J_LEFT){
-        
+        }else if(joypadCurrent & J_LEFT){
+
             // negative x velocity to move the sprite to the left
             velocityX=-1;
         }else{
-        
+
             // Zero x velocity means no horizontal movement
             velocityX=0;
         }
-        
+
         // If the "A" button was just pressed
-        if((joypad() & J_A) && !(joypadPrevious & J_A)){
-        
+        if((joypadCurrent & J_A) && !(joypadPrevious & J_A)){
+
             // Move the sprite downward
             spriteY+=8;
-            
+
         // If the "B" button was just presssed
-        } else if((joypad() & J_B) && !(joypadPrevious & J_B)){
-        
+        } else if((joypadCurrent & J_B) && !(joypadPrevious & J_B)){
+
             // Move the sprite up
             spriteY-=8;
         }
@@ -64,8 +70,6 @@ void main(void)
         // This means an object rendered at 0,0 will not be visible
         // x+5 and y+12 will center the 8x8 tile at our x and y position
         move_sprite(0,spriteX+4,spriteY+12);
-        
-        joypadPrevious=joypad();
 
 		// Done processing, yield CPU and wait for start of next frame
         wait_vbl_done();
